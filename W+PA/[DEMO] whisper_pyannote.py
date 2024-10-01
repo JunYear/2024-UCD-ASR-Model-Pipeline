@@ -25,7 +25,7 @@ def format_speaker_label(speaker):
     else:
         return f"SPEAKER {speaker}"
     
-def diarize_and_transcribe(audio_file_path, output_dir, access_token):
+def diarize_and_transcribe(audio_file_path, output_dir):
     """
     지정된 음성 파일에 대한 화자 다이어리제이션과 전사를 수행하고,
     결과를 지정된 디레거리에 텍스트 파일에 저장하는 함수
@@ -33,7 +33,6 @@ def diarize_and_transcribe(audio_file_path, output_dir, access_token):
     Args:
         audio_file_path (str): 입력 음성 파일의 경로 (예: .wav).
         output_dir (str): 텍스트 파일을 저장할 디렉터리 경로.
-        access_token (str): Hugging Face 액세스 토큰.
     """
     # 음성 파일 존재 여부 확인
     if not os.path.isfile(audio_file_path):
@@ -140,12 +139,11 @@ def diarize_and_transcribe(audio_file_path, output_dir, access_token):
 
 
 if __name__ == "__main__":
-    audio_file = "STT+Diarization/sample.wav"  # 처리할 음성 파일 경로
+    audio_file = "sample.wav"  # 처리할 음성 파일 경로
     output_directory = "output"  # 텍스트 파일을 저장할 디렉터리
-    huggingface_token = "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"  # Hugging Face 액세스 토큰
     
     # 출력 디렉터리가 없으면 생성
     os.makedirs(output_directory, exist_ok=True)
     
     # 함수 호출
-    diarize_and_transcribe(audio_file, output_directory, huggingface_token)
+    diarize_and_transcribe(audio_file, output_directory)
