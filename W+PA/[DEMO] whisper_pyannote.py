@@ -5,14 +5,6 @@ import whisper
 import wave
 import tempfile
 
-# 화자 다이어리제이션 파이프라인(모델) 정의
-diarization = Pipeline.from_pretrained(
-    "pyannote/speaker-diarization-3.1",
-    use_auth_token="YOUR_AUTH_TOKEN")
-
-# ASR (automatic speech recognition) 모델 정의
-asr_model = whisper.load_model("large-v3")
-
 
 def format_speaker_label(speaker):
     """
@@ -25,7 +17,7 @@ def format_speaker_label(speaker):
     else:
         return f"SPEAKER {speaker}"
     
-def diarize_and_transcribe(audio_file_path, output_dir):
+def diarize_and_transcribe(audio_file_path, output_dir, access_token):
     """
     지정된 음성 파일에 대한 화자 다이어리제이션과 전사를 수행하고,
     결과를 지정된 디레거리에 텍스트 파일에 저장하는 함수
@@ -33,6 +25,7 @@ def diarize_and_transcribe(audio_file_path, output_dir):
     Args:
         audio_file_path (str): 입력 음성 파일의 경로 (예: .wav).
         output_dir (str): 텍스트 파일을 저장할 디렉터리 경로.
+        access_token (str): Hugging Face 액세스 토큰.
     """
     # 음성 파일 존재 여부 확인
     if not os.path.isfile(audio_file_path):
@@ -47,7 +40,10 @@ def diarize_and_transcribe(audio_file_path, output_dir):
 
     # 화자 다이어리제이션 파이프라인 로드
     print("Loading speaker diarization pipeline...")
-    diarization_pipeline = diarization
+    diarization_pipeline = Pipeline.from_pretrained(
+        "pyannote/speaker-diarization-3.1",
+        use_auth_token=access_token
+    )
 
     # GPU 사용 가능 시 파이프라인을 GPU로 이동
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -59,10 +55,10 @@ def diarize_and_transcribe(audio_file_path, output_dir):
 
     # Whisper 모델 로드
     print("Loading Whisper Model...")
-    whisper_model = asr_model
+    whisper_model = whisper.load_model("large-v3")
 
     # 전사 수행
-    print("Performing transcription")
+    print("Performing transcription...")
     transcription = whisper_model.transcribe(audio_file_path, word_timestamps=True)
 
     # 단어 단위 세그먼트 추출
@@ -92,7 +88,7 @@ def diarize_and_transcribe(audio_file_path, output_dir):
         })
     
     # 연속된 화자 세그먼트로 텍스트 집계
-    print("화자별로 텍스트 집계 중...")
+    print("Aggregating text by speaker...")
     aggregated_segments = []
     current_speaker = None
     current_text = ""
@@ -141,6 +137,7 @@ def diarize_and_transcribe(audio_file_path, output_dir):
 if __name__ == "__main__":
     audio_file = "sample.wav"  # 처리할 음성 파일 경로
     output_directory = "output"  # 텍스트 파일을 저장할 디렉터리
+    huggingface_token = "YOUR_AUTH_TOKEN"    # Hugging Face 액세스 토큰
     
     # 출력 디렉터리가 없으면 생성
     os.makedirs(output_directory, exist_ok=True)
