@@ -19,7 +19,7 @@ def format_speaker_label(speaker):
     화자 라벨을 'SPEAKER 01' 형식으로 변환을 위한 함수
     예: 'SPEAKER_00' -> 'SPEAKER 00'
     """
-    if speaker.lower().startwith("speaker_"):
+    if speaker.lower().startswith("speaker_"):
         speaker_num = speaker.split("_")[-1]
         return f"SPEAKER {speaker_num}"
     else:
