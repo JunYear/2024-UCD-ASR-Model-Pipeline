@@ -1,0 +1,15 @@
+# environments
+python-dotenv
+torch
+
+# models
+pyannote.audio
+whisper
+faster-whisper
+
+# eval
+jiwer
+matplotlib
+
+# APi
+fastapi[standard]
