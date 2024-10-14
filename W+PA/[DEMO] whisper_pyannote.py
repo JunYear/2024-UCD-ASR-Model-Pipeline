@@ -17,6 +17,19 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s: %(message)s'
 )
 
+def format_elapsed_time(seconds):
+    """
+    초 단위의 시간을 'Xm Ys 형식으로 변환을 위한 함수
+
+    Args:
+        seconds (float): 소요 시간 (초).
+    Returns:
+        str: 변환된 시간 문자열 (예: '1m 30s').
+    """
+    minutes = int(seconds // 60)
+    secs = seconds % 60
+    return f"{minutes}m {secs:.2f}s"
+
 
 def format_speaker_label(speaker):
     """
@@ -70,7 +83,8 @@ def diarize_and_transcribe(audio_file_path, output_dir, access_token):
         raise e
     
     end_diarization_pipeline = time.perf_counter()
-    logging.info(f"Finished loading the speaker diarization pipeline.\n---> Time taken: {end_diarization_pipeline - start_diarization_pipeline:.2f}s")
+    elapsed_diarization_pipeline = end_diarization_pipeline - start_diarization_pipeline
+    logging.info(f"Finished loading the speaker diarization pipeline.\n---> Time taken: {format_elapsed_time(elapsed_diarization_pipeline)}")
 
     # GPU 사용 가능 시 파이프라인을 GPU로 이동
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -89,7 +103,8 @@ def diarize_and_transcribe(audio_file_path, output_dir, access_token):
         raise e
 
     end_diarization = time.perf_counter()
-    logging.info(f"Finished Speaker Diarization.\n---> Time taken: {end_diarization - start_diarization:.2f}s")
+    elapsed_diarization = end_diarization - start_diarization
+    logging.info(f"Finished Speaker Diarization.\n---> Time taken: {format_elapsed_time(elapsed_diarization)}")
 
 
     # Whisper 모델 로드
@@ -103,7 +118,8 @@ def diarize_and_transcribe(audio_file_path, output_dir, access_token):
         raise e
     
     end_transcription_load = time.perf_counter()
-    logging.info(f"Finished loading the \"Whisper-{whisper_model}\"..\n---> Time taken: {end_transcription_load - start_transcription_load:.2f}s")
+    elasped_transcription_load = end_transcription_load - start_transcription_load
+    logging.info(f"Finished loading the Whisper model..\n---> Time taken: {format_elapsed_time(elasped_transcription_load)}")
  
 
     # 전사 수행
@@ -117,7 +133,8 @@ def diarize_and_transcribe(audio_file_path, output_dir, access_token):
         raise e
     
     end_transcription = time.perf_counter()
-    logging.info(f"Finished transcription.\n---> Time taken: {end_transcription - start_diarization:.2f}s")
+    elapsed_transcription = end_transcription - start_transcription
+    logging.info(f"Finished transcription.\n---> Time taken: {format_elapsed_time(elapsed_transcription)}")
 
     # 단어 단위 세그먼트 추출
     words = transcription.get("segments", [])
@@ -195,7 +212,8 @@ def diarize_and_transcribe(audio_file_path, output_dir, access_token):
     
     # 전체 처리 시간 측정 종료
     end_total = time.perf_counter()
-    logging.info(f"Processing completed.\n---> Total Time taken: {end_total - start_total:.2f}s")
+    elapsed_total = end_total - start_total
+    logging.info(f"Processing completed.\n---> Total Time taken: {format_elapsed_time(elapsed_total)}")
 
 
 if __name__ == "__main__":
